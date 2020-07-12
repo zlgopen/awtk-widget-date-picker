@@ -30,6 +30,95 @@ BEGIN_C_DECLS
  * @parent widget_t
  * @annotation ["scriptable","design","widget"]
  * 日期选择控件。
+ * date\_picker\_t是[widget\_t](widget_t.md)的子类控件，widget\_t的函数均适用于date\_picker\_t控件。
+ * 
+ * date\_picker 需要几个特殊名称的子控件，它们的名称和功能如下： 
+ * 
+ * * prev_year 切换到前一年的按钮。
+ * * prev_month 切换到前一月的按钮。
+ * * year_month 显示当前年月的文本。
+ * * next_month 切换到后一月的按钮。
+ * * next_year 切换到后一年的按钮。
+ * * days 存放"天"的容器控件，里面放42个按钮。
+ * * today "今天"按钮。
+ * 
+ * 子控件的大小和风格可以自行设定，遵循命名规则即可。
+ * 
+ * 在xml中使用"date\_picker"标签创建按钮控件。如：
+ *
+ * ```xml
+ * <date_picker x="c" y="m" w="280" h="280">
+ *   <row name="title" x="0" y="0" w="100%" h="30">
+ *     <button name="prev_year" x="0" y="m" w="30" h="26" text="<<"/>
+ *     <button name="prev_month" x="35" y="m" w="30" h="26" text="<"/>
+ *     <label name="year_month" x="c" y="m" w="50%" h="100%" text="2020/7"/>
+ *     <button name="next_month" x="r:35" y="m" w="30" h="26" text=">"/>
+ *     <button name="next_year" x="r" y="m" w="30" h="26" text=">>"/>
+ *   </row>
+ *
+ *   <row name="week" x="0" y="32" w="100%" h="30" children_layout="default(r=1,c=7,m=2,s=2)">
+ *     <label name="sun" tr_text="Su"/>
+ *     <label name="mon" tr_text="Mo"/>
+ *     <label name="tue" tr_text="Tu"/>
+ *     <label name="wed" tr_text="We"/>
+ *     <label name="thu" tr_text="Th"/>
+ *     <label name="fri" tr_text="Fr"/>
+ *     <label name="sat" tr_text="Sa"/>
+ *   </row>
+ *
+ *   <grid name="days" x="0" y="64" w="100%" h="-100" children_layout="default(r=6,c=7,m=2,s=2)">
+ *     <button text="0"/>
+ *     <button text="1"/>
+ *     <button text="2"/>
+ *     <button text="3"/>
+ *     <button text="4"/>
+ *     <button text="5"/>
+ *     <button text="6"/>
+ *      
+ *     <button text="0"/>
+ *     <button text="1"/>
+ *     <button text="2"/>
+ *     <button text="3"/>
+ *     <button text="4"/>
+ *     <button text="5"/>
+ *     <button text="6"/>
+ *     
+ *     <button text="0"/>
+ *     <button text="1"/>
+ *     <button text="2"/>
+ *     <button text="3"/>
+ *     <button text="4"/>
+ *     <button text="5"/>
+ *     <button text="6"/>
+ *
+ *     <button text="0"/>
+ *     <button text="1"/>
+ *     <button text="2"/>
+ *     <button text="3"/>
+ *     <button text="4"/>
+ *     <button text="5"/>
+ *     <button text="6"/>
+ *
+ *    <button text="0"/>
+ *     <button text="1"/>
+ *     <button text="2"/>
+ *     <button text="3"/>
+ *     <button text="4"/>
+ *     <button text="5"/>
+ *     <button text="6"/>
+ *
+ *     <button text="0"/>
+ *     <button text="1"/>
+ *     <button text="2"/>
+ *     <button text="3"/>
+ *     <button text="4"/>
+ *     <button text="5"/>
+ *     <button text="6"/>
+ *   </grid>
+ *   <button name="today" x="c" y="b:2" w="60" h="30" tr_text="Today">
+ * </date_picker>
+ * ```
+ * 
  */
 typedef struct _date_picker_t {
   widget_t widget;

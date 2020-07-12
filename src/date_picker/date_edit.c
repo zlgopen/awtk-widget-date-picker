@@ -1,7 +1,7 @@
 ﻿/**
  * File:   date_edit.c
  * Author: AWTK Develop Team
- * Brief:  日期选择控件。
+ * Brief:  日期编辑控件。
  *
  * Copyright (c) 2020 - 2020 Guangzhou ZHIYUAN Electronics Co.,Ltd.
  *
@@ -25,9 +25,6 @@
 #include "base/window.h"
 #include "date_edit.h"
 #include "date_picker.h"
-
-#define DATE_EDIT_CHILD_DATE "date"
-#define DATE_EDIT_CHILD_PICK "pick"
 
 static ret_t date_edit_update_view(widget_t* widget);
 
@@ -123,7 +120,7 @@ static ret_t date_edit_update_view(widget_t* widget) {
   date_edit_t* date_edit = DATE_EDIT(widget);
   widget_t* widget_date = widget_lookup(widget, DATE_EDIT_CHILD_DATE, TRUE);
 
-  tk_snprintf(text, sizeof(text) - 1, "%d/%d/%d", date_edit->year, date_edit->month,
+  tk_snprintf(text, sizeof(text) - 1, DATE_EDIT_FORMAT, date_edit->year, date_edit->month,
               date_edit->day);
   widget_set_text_utf8(widget_date, text);
 
@@ -145,12 +142,37 @@ static ret_t date_edit_on_picked(void* ctx, event_t* e) {
   return RET_OK;
 }
 
+static ret_t date_edit_on_edited(void* ctx, event_t* e) {
+  str_t str;
+  int day = 0;
+  int year = 0;
+  int month = 0;
+  widget_t* widget = WIDGET(ctx);
+  widget_t* target = WIDGET(e->target);
+  date_edit_t* date_edit = DATE_EDIT(widget);
+  date_picker_t* date_picker = DATE_PICKER(e->target);
+
+  return_value_if_fail(str_init(&str, 64) != NULL, RET_OK);
+
+  str_from_wstr(&str, target->text.str);
+  if (tk_sscanf(str.str, DATE_EDIT_FORMAT, &year, &month, &day) == 3) {
+    date_edit->year = year;
+    date_edit->month = month;
+    date_edit->day = day;
+    widget_dispatch_simple_event(widget, EVT_VALUE_CHANGED);
+  }
+  str_reset(&str);
+
+  return RET_OK;
+}
+
 static ret_t date_edit_on_pick_clicked(void* ctx, event_t* e) {
   point_t p = {0, 0};
   widget_t* widget = WIDGET(ctx);
   date_edit_t* date_edit = DATE_EDIT(widget);
   widget_t* win = window_open("date_picker");
   widget_t* wm = widget_get_window_manager(widget);
+  widget_t* date = widget_lookup(win, DATE_EDIT_CHILD_DATE, TRUE);
   widget_t* picker = widget_lookup_by_type(win, WIDGET_TYPE_DATE_PICKER, TRUE);
 
   widget_to_screen(widget, &p);
@@ -182,21 +204,12 @@ static ret_t date_edit_on_pick_clicked(void* ctx, event_t* e) {
   return RET_OK;
 }
 
-static ret_t date_edit_on_visit_child(void* ctx, const void* data) {
-  widget_t* child = WIDGET(data);
-
-  if (tk_str_eq(widget_get_type(child), WIDGET_TYPE_BUTTON)) {
-    widget_on(child, EVT_CLICK, date_edit_on_pick_clicked, ctx);
-  }
-
-  return RET_OK;
-}
-
 static ret_t date_edit_init(widget_t* widget) {
   date_edit_t* date_edit = DATE_EDIT(widget);
 
   date_edit_update_view(widget);
   widget_child_on(widget, DATE_EDIT_CHILD_PICK, EVT_CLICK, date_edit_on_pick_clicked, widget);
+  widget_child_on(widget, DATE_EDIT_CHILD_DATE, EVT_VALUE_CHANGED, date_edit_on_edited, widget);
 
   date_edit->inited;
 
@@ -204,8 +217,7 @@ static ret_t date_edit_init(widget_t* widget) {
 }
 
 static ret_t date_edit_on_event(widget_t* widget, event_t* e) {
-  date_edit_t* date_edit = DATE_EDIT(widget);
-  return_value_if_fail(widget != NULL && date_edit != NULL, RET_BAD_PARAMS);
+  return_value_if_fail(widget != NULL, RET_BAD_PARAMS);
 
   switch (e->type) {
     case EVT_WINDOW_WILL_OPEN: {
@@ -213,7 +225,6 @@ static ret_t date_edit_on_event(widget_t* widget, event_t* e) {
       break;
     }
   }
-  (void)date_edit;
 
   return RET_OK;
 }

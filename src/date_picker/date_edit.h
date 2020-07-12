@@ -1,7 +1,7 @@
 ﻿/**
  * File:   date_edit.h
  * Author: AWTK Develop Team
- * Brief:  日期选择控件。
+ * Brief:  日期编辑控件。
  *
  * Copyright (c) 2020 - 2020 Guangzhou ZHIYUAN Electronics Co.,Ltd.
  *
@@ -29,7 +29,27 @@ BEGIN_C_DECLS
  * @class date_edit_t
  * @parent widget_t
  * @annotation ["scriptable","design","widget"]
- * 日期选择控件。
+ * 日期编辑控件。
+ * 
+ * date\_edit\_t是[widget\_t](widget_t.md)的子类控件，widget\_t的函数均适用于date\_edit\_t控件。
+ * 
+ * date\_edit 需要两个特殊名称的子控件，它们的名称和功能如下： 
+ * 
+ * * date 用于显示和编辑日期，通常用edit控件，并指定input type为"date"
+ * * pick 用于点击后弹出日期选择控件。通常用button控件。点击pick按钮后，会打开名为"date_picker"的弹出窗口。
+ * 
+ * 子控件的大小和风格可以自行设定，遵循命名规则即可。
+ * 
+ * 在xml中使用"date\_edit"标签创建按钮控件。如：
+ *
+ * ```xml
+ * <date_edit x="10" y="10" w="148" h="30" year="2020" month="12" day="31">
+ *   <edit name="date" x="0" y="m" w="100%" h="100%" input_type="date" />
+ *   <button name="pick" style="pick" x="r:2" y="m" w="26" h="26" text="..." />
+ * </date_edit>
+ * ```
+ * 
+ *
  */
 typedef struct _date_edit_t {
   widget_t widget;
@@ -124,6 +144,10 @@ ret_t date_edit_set_day(widget_t* widget, uint32_t day);
 #define DATE_EDIT_PROP_YEAR "year"
 #define DATE_EDIT_PROP_MONTH "month"
 #define DATE_EDIT_PROP_DAY "day"
+
+#define DATE_EDIT_FORMAT "%d/%d/%d"
+#define DATE_EDIT_CHILD_DATE "date"
+#define DATE_EDIT_CHILD_PICK "pick"
 
 #define WIDGET_TYPE_DATE_EDIT "date_edit"
 

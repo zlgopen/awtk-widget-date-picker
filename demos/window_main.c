@@ -1,4 +1,5 @@
 ﻿#include "awtk.h"
+#include "date_picker/date_edit.h"
 
 static ret_t on_close(void* ctx, event_t* e) {
   tk_quit();
@@ -19,6 +20,15 @@ static ret_t on_lang_changed(void* ctx, event_t* e) {
   return RET_OK;
 }
 
+static ret_t on_date_changed(void* ctx, event_t* e) {
+  widget_t* widget = WIDGET(e->target);
+  date_edit_t* date_edit = DATE_EDIT(widget);
+
+  log_debug("%d/%d/%d\n", date_edit->year, date_edit->month, date_edit->day);
+
+  return RET_OK;
+}
+
 /**
  * 初始化
  */
@@ -28,6 +38,10 @@ ret_t application_init(void) {
   widget_t* win = window_open("main");
   widget_child_on(win, "close", EVT_CLICK, on_close, NULL); 
   widget_child_on(win, "lang", EVT_VALUE_CHANGED, on_lang_changed, NULL); 
+  widget_child_on(win, "d1", EVT_VALUE_CHANGED, on_date_changed, NULL); 
+  widget_child_on(win, "d2", EVT_VALUE_CHANGED, on_date_changed, NULL); 
+  widget_child_on(win, "d3", EVT_VALUE_CHANGED, on_date_changed, NULL); 
+  widget_child_on(win, "d4", EVT_VALUE_CHANGED, on_date_changed, NULL); 
 
   return RET_OK;
 }
