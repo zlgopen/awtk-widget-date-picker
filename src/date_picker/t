@@ -1,0 +1,12 @@
+﻿#define DATE_PICKER_CHILD_ prev_year
+#define DATE_PICKER_CHILD_ prev_month
+#define DATE_PICKER_CHILD_ next_year
+#define DATE_PICKER_CHILD_ next_month
+#define DATE_PICKER_CHILD_ mon
+#define DATE_PICKER_CHILD_ tue
+#define DATE_PICKER_CHILD_ wed
+#define DATE_PICKER_CHILD_ thu
+#define DATE_PICKER_CHILD_ fri
+#define DATE_PICKER_CHILD_ sat
+#define DATE_PICKER_CHILD_ sun
+#define DATE_PICKER_CHILD_ today
