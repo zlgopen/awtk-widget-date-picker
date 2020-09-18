@@ -1,4 +1,5 @@
 ﻿#include "awtk.h"
+#include "date_picker_register.h"
 #include "date_picker/date_edit.h"
 
 static ret_t on_close(void* ctx, event_t* e) {
@@ -21,10 +22,9 @@ static ret_t on_lang_changed(void* ctx, event_t* e) {
 }
 
 static ret_t on_date_changed(void* ctx, event_t* e) {
-  widget_t* widget = WIDGET(e->target);
-  date_edit_t* date_edit = DATE_EDIT(widget);
+  value_change_event_t* evt = (value_change_event_cast(e));
 
-  log_debug("%d/%d/%d\n", date_edit->year, date_edit->month, date_edit->day);
+  log_debug("%s => %s\n", value_str(&(evt->old_value)), value_str(&(evt->new_value)));
 
   return RET_OK;
 }
