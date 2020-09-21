@@ -36,6 +36,16 @@ ret_t application_init(void) {
   date_picker_register();
 
   widget_t* win = window_open("main");
+  widget_t* lang = widget_lookup(win, "lang", TRUE);
+
+  /*test set default lange to en_US*/
+  combo_box_set_value(lang, 0);
+  locale_info_change(locale_info(), "en", "US");
+  
+  /*test set default lange to zh_CN*/
+  //combo_box_set_value(lang, 1);
+  //locale_info_change(locale_info(), "zh", "CN");
+
   widget_child_on(win, "close", EVT_CLICK, on_close, NULL); 
   widget_child_on(win, "lang", EVT_VALUE_CHANGED, on_lang_changed, NULL); 
   widget_child_on(win, "d1", EVT_VALUE_CHANGED, on_date_changed, NULL); 
