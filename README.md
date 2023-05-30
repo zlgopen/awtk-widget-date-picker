@@ -64,15 +64,15 @@ scons LINUX_FB=true
 ./bin/demo
 ```
 
-## 文档
+## 如何使用 date_picker 控件
 
 ### 基本用法
 
 date\_edit 需要两个特殊名称的子控件，它们的名称和功能如下： 
-  
+
  * date 用于显示和编辑日期，通常用 edit 控件，并指定 input type 为"date"
  * pick 用于点击后弹出日期选择控件。通常用 button 控件。点击 pick 按钮后，会打开名为"date_picker"的弹出窗口。
-  
+
 > 子控件的大小和风格可以自行设定，遵循命名规则即可。
 
 示例：
@@ -81,7 +81,7 @@ date\_edit 需要两个特殊名称的子控件，它们的名称和功能如下
   <date_edit name="d1" x="10" y="10" w="148" h="30" year="2020" month="12" day="31">
     <edit name="date" x="0" y="m" w="100%" h="100%" input_type="date" />
     <button name="pick" style="pick" x="r:2" y="m" w="26" h="26" text="..." />
-  </date_edit
+</date_edit>
 ```
 
 > 完整示例请参考: main.xml
@@ -107,6 +107,16 @@ static ret_t on_date_changed(void* ctx, event_t* e) {
 ### 弹出窗口
 
 弹出的日期选择窗口名称为 date_picker，可以根据自己的情况定制（主要是设置控件的显示风格）。
+
+date_picker 中也需要特殊名称的子控件，它们的名称与功能分别是：
+
+- prev_year 点击后切换到前一年，通常为 button 控件。
+- prev_month 点击后切换到前一月，通常为 button 控件。
+- year_month 显示当前年月的文本，通常为 label 控件。
+- next_month 点击后切换到后一月，通常为 button 控件。
+- next_year 点击后切换到后一年，通常为 button 控件。
+- days 存放"天"的容器控件，需要在容器内放42个按钮作为日期显示，通常为 grid 控件。
+- today 点击后切换到今天，通常为 button 控件。
 
 其内容如下：
 
@@ -190,6 +200,6 @@ static ret_t on_date_changed(void* ctx, event_t* e) {
 
 请参考 strings.xml
 
-### 其它文档
+## 文档
 
 [完善自定义控件](https://github.com/zlgopen/awtk-widget-generator/blob/master/docs/improve_generated_widget.md)
