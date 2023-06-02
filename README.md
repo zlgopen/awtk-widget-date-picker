@@ -78,9 +78,9 @@ date\_edit 需要两个特殊名称的子控件，它们的名称和功能如下
 示例：
 
 ```xml
-  <date_edit name="d1" x="10" y="10" w="148" h="30" year="2020" month="12" day="31">
-    <edit name="date" x="0" y="m" w="100%" h="100%" input_type="date" />
-    <button name="pick" style="pick" x="r:2" y="m" w="26" h="26" text="..." />
+<date_edit name="d1" x="10" y="10" w="148" h="30" year="2020" month="12" day="31">
+  <edit name="date" x="0" y="m" w="100%" h="100%" input_type="date" />
+  <button name="pick" style="pick" x="r:2" y="m" w="26" h="26" text="..." />
 </date_edit>
 ```
 
@@ -103,6 +103,14 @@ static ret_t on_date_changed(void* ctx, event_t* e) {
 ````
 
 > 完整示例请参考: window_main.c
+
+date_edit 控件的属性及作用如下表所示：
+
+| 属性名 | 作用 |
+| ------ | ---- |
+| year   | 年   |
+| month  | 月   |
+| day    | 日   |
 
 ### 弹出窗口
 
@@ -193,8 +201,15 @@ date_picker 中也需要特殊名称的子控件，它们的名称与功能分�
     <button name="today" x="c" y="b:2" w="60" h="30" tr_text="Today">
   </date_picker>
 </popup>
-
 ```
+
+date_picker 控件的属性及作用如下表所示：
+
+| 属性名 | 作用 |
+| ------ | ---- |
+| year   | 年   |
+| month  | 月   |
+| day    | 日   |
 
 ### 需要翻译的字符串
 
