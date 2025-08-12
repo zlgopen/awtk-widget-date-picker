@@ -35,9 +35,7 @@ ret_t date_edit_set_year(widget_t* widget, uint32_t year) {
   return_value_if_fail(date_edit != NULL, RET_BAD_PARAMS);
 
   date_edit->year = year;
-  if (date_edit->inited) {
-    date_edit_update_view(widget);
-  }
+  date_edit_update_view(widget);
 
   return RET_OK;
 }
@@ -47,9 +45,7 @@ ret_t date_edit_set_month(widget_t* widget, uint32_t month) {
   return_value_if_fail(date_edit != NULL, RET_BAD_PARAMS);
 
   date_edit->month = month;
-  if (date_edit->inited) {
-    date_edit_update_view(widget);
-  }
+  date_edit_update_view(widget);
 
   return RET_OK;
 }
@@ -59,9 +55,7 @@ ret_t date_edit_set_day(widget_t* widget, uint32_t day) {
   return_value_if_fail(date_edit != NULL, RET_BAD_PARAMS);
 
   date_edit->day = day;
-  if (date_edit->inited) {
-    date_edit_update_view(widget);
-  }
+  date_edit_update_view(widget);
 
   return RET_OK;
 }
@@ -78,6 +72,18 @@ static ret_t date_edit_get_prop(widget_t* widget, const char* name, value_t* v) 
     return RET_OK;
   } else if (tk_str_eq(DATE_EDIT_PROP_DAY, name)) {
     value_set_uint32(v, date_edit->day);
+    return RET_OK;
+  } else if (tk_str_eq(WIDGET_PROP_TEXT, name)) {
+    date_edit_t* date_edit = DATE_EDIT(widget);
+    char text[64];
+    tk_snprintf(text, sizeof(text) - 1, DATE_EDIT_FORMAT, date_edit->year, date_edit->month,
+                date_edit->day);
+    if (date_edit->text_cache == NULL) {
+      date_edit->text_cache = wstr_create(sizeof(text) - 1);
+      return_value_if_fail(date_edit->text_cache != NULL, RET_OOM);
+    }
+    wstr_set_utf8(date_edit->text_cache, text);
+    value_set_wstr(v, date_edit->text_cache->str);
     return RET_OK;
   }
 
@@ -96,6 +102,18 @@ static ret_t date_edit_set_prop(widget_t* widget, const char* name, const value_
   } else if (tk_str_eq(DATE_EDIT_PROP_DAY, name)) {
     date_edit_set_day(widget, value_uint32(v));
     return RET_OK;
+  } else if (tk_str_eq(WIDGET_PROP_TEXT, name)) {
+    date_edit_t* date_edit = DATE_EDIT(widget);
+    uint32_t year = date_edit->year, month = date_edit->month, day = date_edit->day;
+    const char* str = value_str(v);
+    if (TK_STR_IS_NOT_EMPTY(str) && (3 == tk_sscanf(str, DATE_EDIT_FORMAT, &year, &month, &day))) {
+      date_edit->year = year;
+      date_edit->month = month;
+      date_edit->day = day;
+      date_edit_update_view(widget);
+      return RET_OK;
+    }
+    return RET_FAIL;
   }
 
   return RET_NOT_FOUND;
@@ -104,6 +122,10 @@ static ret_t date_edit_set_prop(widget_t* widget, const char* name, const value_
 static ret_t date_edit_on_destroy(widget_t* widget) {
   date_edit_t* date_edit = DATE_EDIT(widget);
   return_value_if_fail(widget != NULL && date_edit != NULL, RET_BAD_PARAMS);
+
+  if (date_edit->text_cache != NULL) {
+    wstr_destroy(date_edit->text_cache);
+  }
 
   return RET_OK;
 }
@@ -117,13 +139,16 @@ static ret_t date_edit_on_paint_self(widget_t* widget, canvas_t* c) {
 }
 
 static ret_t date_edit_update_view(widget_t* widget) {
-  char text[64];
   date_edit_t* date_edit = DATE_EDIT(widget);
-  widget_t* widget_date = widget_lookup(widget, DATE_EDIT_CHILD_DATE, TRUE);
 
-  tk_snprintf(text, sizeof(text) - 1, DATE_EDIT_FORMAT, date_edit->year, date_edit->month,
-              date_edit->day);
-  widget_set_text_utf8(widget_date, text);
+  if (!widget->loading) {
+    char text[64];
+    widget_t* widget_date = widget_lookup(widget, DATE_EDIT_CHILD_DATE, TRUE);
+
+    tk_snprintf(text, sizeof(text) - 1, DATE_EDIT_FORMAT, date_edit->year, date_edit->month,
+                date_edit->day);
+    widget_set_text_utf8(widget_date, text);
+  }
 
   return RET_OK;
 }
@@ -144,23 +169,22 @@ static ret_t date_edit_set_value(widget_t* widget, int year, int month, int day)
   value_change_event_t evt;
   date_edit_t* date_edit = DATE_EDIT(widget);
 
-  if(date_edit->year == year && date_edit->month == month && date_edit->day == day) {
+  if (date_edit->year == year && date_edit->month == month && date_edit->day == day) {
     return RET_OK;
   }
 
-  tk_snprintf(old_text, sizeof(old_text)-1, DATE_EDIT_FORMAT, 
-      date_edit->year, date_edit->month, date_edit->day);
-  tk_snprintf(new_text, sizeof(old_text)-1, DATE_EDIT_FORMAT, 
-      year, month, day);
+  tk_snprintf(old_text, sizeof(old_text) - 1, DATE_EDIT_FORMAT, date_edit->year, date_edit->month,
+              date_edit->day);
+  tk_snprintf(new_text, sizeof(old_text) - 1, DATE_EDIT_FORMAT, year, month, day);
   value_change_event_init(&evt, EVT_VALUE_WILL_CHANGE, widget);
   value_set_str(&(evt.old_value), old_text);
   value_set_str(&(evt.new_value), new_text);
 
-  if(widget_dispatch(widget, (event_t*)&evt) != RET_STOP) {
+  if (widget_dispatch(widget, (event_t*)&evt) != RET_STOP) {
     date_edit->year = year;
     date_edit->month = month;
     date_edit->day = day;
-  
+
     evt.e.type = EVT_VALUE_CHANGED;
     widget_dispatch(widget, (event_t*)&evt);
     widget_invalidate(widget, NULL);
@@ -231,14 +255,47 @@ static ret_t date_edit_on_pick_clicked(void* ctx, event_t* e) {
   return RET_OK;
 }
 
-static ret_t date_edit_init(widget_t* widget) {
+static ret_t date_edit_load_child(widget_t* widget, widget_t* child) {
+  return_value_if_fail(widget != NULL && child != NULL, RET_BAD_PARAMS);
+
+  if (tk_str_eq(child->name, DATE_EDIT_CHILD_DATE)) {
+    date_edit_update_view(widget);
+    if (!emitter_exist(child->emitter, EVT_VALUE_CHANGED, date_edit_on_edited, widget)) {
+      widget_on(child, EVT_VALUE_CHANGED, date_edit_on_edited, widget);
+    }
+  } else if (tk_str_eq(child->name, DATE_EDIT_CHILD_PICK)) {
+    if (!emitter_exist(child->emitter, EVT_CLICK, date_edit_on_pick_clicked, widget)) {
+      widget_on(child, EVT_CLICK, date_edit_on_pick_clicked, widget);
+    }
+  }
+
+  return RET_OK;
+}
+
+inline static ret_t date_edit_load(widget_t* widget) {
+  WIDGET_FOR_EACH_CHILD_BEGIN(widget, child, i)
+  date_edit_load_child(widget, child);
+  WIDGET_FOR_EACH_CHILD_END()
+  return RET_OK;
+}
+
+static ret_t date_edit_on_add_child_on_idle(const idle_info_t* idle) {
+  widget_t* widget = WIDGET(idle->ctx);
   date_edit_t* date_edit = DATE_EDIT(widget);
+  date_edit_load(widget);
+  date_edit->load_children_idle_id = TK_INVALID_ID;
+  return RET_REMOVE;
+}
 
-  date_edit_update_view(widget);
-  widget_child_on(widget, DATE_EDIT_CHILD_PICK, EVT_CLICK, date_edit_on_pick_clicked, widget);
-  widget_child_on(widget, DATE_EDIT_CHILD_DATE, EVT_VALUE_CHANGED, date_edit_on_edited, widget);
+static ret_t date_edit_add_child(widget_t* widget) {
+  return_value_if_fail(widget != NULL, RET_BAD_PARAMS);
 
-  date_edit->inited = TRUE;
+  if (!widget->loading && !widget->destroying) {
+    date_edit_t* date_edit = DATE_EDIT(widget);
+    if (date_edit->load_children_idle_id == TK_INVALID_ID) {
+      date_edit->load_children_idle_id = widget_add_idle(widget, date_edit_on_add_child_on_idle);
+    }
+  }
 
   return RET_OK;
 }
@@ -247,10 +304,15 @@ static ret_t date_edit_on_event(widget_t* widget, event_t* e) {
   return_value_if_fail(widget != NULL, RET_BAD_PARAMS);
 
   switch (e->type) {
-    case EVT_WINDOW_WILL_OPEN: {
-      date_edit_init(widget);
-      break;
-    }
+    case EVT_WIDGET_LOAD:
+    case EVT_WINDOW_LOAD: {
+      date_edit_load(widget);
+    } break;
+    case EVT_WIDGET_ADD_CHILD: {
+      date_edit_add_child(widget);
+    } break;
+    default: {
+    } break;
   }
 
   return RET_OK;
@@ -259,17 +321,19 @@ static ret_t date_edit_on_event(widget_t* widget, event_t* e) {
 const char* s_date_edit_properties[] = {DATE_EDIT_PROP_YEAR, DATE_EDIT_PROP_MONTH,
                                         DATE_EDIT_PROP_DAY, NULL};
 
-TK_DECL_VTABLE(date_edit) = {.size = sizeof(date_edit_t),
-                             .type = WIDGET_TYPE_DATE_EDIT,
-                             .clone_properties = s_date_edit_properties,
-                             .persistent_properties = s_date_edit_properties,
-                             .parent = TK_PARENT_VTABLE(widget),
-                             .create = date_edit_create,
-                             .on_paint_self = date_edit_on_paint_self,
-                             .set_prop = date_edit_set_prop,
-                             .get_prop = date_edit_get_prop,
-                             .on_event = date_edit_on_event,
-                             .on_destroy = date_edit_on_destroy};
+TK_DECL_VTABLE(date_edit) = {
+    .size = sizeof(date_edit_t),
+    .type = WIDGET_TYPE_DATE_EDIT,
+    .clone_properties = s_date_edit_properties,
+    .persistent_properties = s_date_edit_properties,
+    .parent = TK_PARENT_VTABLE(widget),
+    .create = date_edit_create,
+    .on_paint_self = date_edit_on_paint_self,
+    .set_prop = date_edit_set_prop,
+    .get_prop = date_edit_get_prop,
+    .on_event = date_edit_on_event,
+    .on_destroy = date_edit_on_destroy,
+};
 
 widget_t* date_edit_create(widget_t* parent, xy_t x, xy_t y, wh_t w, wh_t h) {
   widget_t* widget = widget_create(parent, TK_REF_VTABLE(date_edit), x, y, w, h);

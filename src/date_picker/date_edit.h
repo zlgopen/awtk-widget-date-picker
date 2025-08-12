@@ -91,7 +91,8 @@ typedef struct _date_edit_t {
   uint32_t day;
 
   /*private*/
-  bool_t inited;
+  uint32_t load_children_idle_id;
+  wstr_t* text_cache;
 } date_edit_t;
 
 /**
